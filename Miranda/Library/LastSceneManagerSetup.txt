@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Other Crap Scene.unity
+- path: Assets/Natahn's SHIT/Nathan's Shits.unity
   isLoaded: 1
   isActive: 1
