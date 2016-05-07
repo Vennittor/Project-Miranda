@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Natahn's SHIT/Nathan's Shits.unity
+- path: Assets/Scenes/DummyScannable.unity
   isLoaded: 1
   isActive: 1
