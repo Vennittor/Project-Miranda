@@ -1,37 +1,47 @@
 fileFormatVersion: 2
-guid: f6a16447775eb8348983f4322b74e39e
-timeCreated: 1462852937
+guid: f93a60e96c1693b4f9c31266762d0510
+timeCreated: 1462855588
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
     100000: Eye
     100002: Eye_Housing
-    100004: Inner_Probe
+    100004: Inner_Shell
     100006: Lens
-    100008: //RootNode
-    100010: Probe_Shell
+    100008: Outer_Shell_1
+    100010: Outer_Shell_2
+    100012: Outer_Shell_3
+    100014: //RootNode
     400000: Eye
     400002: Eye_Housing
-    400004: Inner_Probe
+    400004: Inner_Shell
     400006: Lens
-    400008: //RootNode
-    400010: Probe_Shell
+    400008: Outer_Shell_1
+    400010: Outer_Shell_2
+    400012: Outer_Shell_3
+    400014: //RootNode
     2300000: Eye
     2300002: Eye_Housing
-    2300004: Inner_Probe
+    2300004: Inner_Shell
     2300006: Lens
-    2300008: Probe_Shell
+    2300008: Outer_Shell_1
+    2300010: Outer_Shell_2
+    2300012: Outer_Shell_3
     3300000: Eye
     3300002: Eye_Housing
-    3300004: Inner_Probe
+    3300004: Inner_Shell
     3300006: Lens
-    3300008: Probe_Shell
-    4300000: Inner_Probe
-    4300002: Probe_Shell
-    4300004: Lens
-    4300006: Eye_Housing
-    4300008: Eye
+    3300008: Outer_Shell_1
+    3300010: Outer_Shell_2
+    3300012: Outer_Shell_3
+    4300000: Inner_Shell
+    4300002: Lens
+    4300004: Eye_Housing
+    4300006: Eye
+    4300008: Outer_Shell_1
+    4300010: Outer_Shell_2
+    4300012: Outer_Shell_3
     9500000: //RootNode
   materials:
     importMaterials: 1
