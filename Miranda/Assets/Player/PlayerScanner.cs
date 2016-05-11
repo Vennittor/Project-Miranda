@@ -19,8 +19,11 @@ public class PlayerScanner : MonoBehaviour {
 
 	void Update() {
 		for(int i=0; i < targets.Count; i++) {
-			Debug.DrawLine(transform.position,
-				targets[i].transform.position);
+			if (targets[i])
+				Debug.DrawLine(transform.position,
+					targets[i].transform.position);
+			else
+				targets.Remove(targets[i]);
 		}
 	}
 
@@ -66,12 +69,6 @@ public class PlayerScanner : MonoBehaviour {
 		Debug.Log("Scannables detected: " + mTargets.Count);
 		foreach(GameObject t in mTargets) {
 			Debug.Log("Scannable: " + t);
-			// FIXME There is literally no way this could be going wrong and yet it throws
-			// some BS response on null despite everything else works perfectly fine in here
-
-			// It just decides to stop as soon as any object being checked this far has its
-			// transform checked with Distance(). I've even moved objects in this just to
-			// see if that goes wrong and no, those work perfectly fine.
 
 			d = Vector3.Distance(t.transform.position,_transform.position);
 			if (d < tNearestDistance) {

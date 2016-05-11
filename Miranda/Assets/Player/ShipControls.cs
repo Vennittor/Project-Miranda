@@ -56,6 +56,8 @@ public class ShipControls : MonoBehaviour
             //PITCH AND YAW MOVEMENT
             transform.Rotate(new Vector3(Input.GetAxis("Mouse Y"), 0, Input.GetAxis("Mouse X")) * -1 * mousespeed);
 
+
+
             //FORWARD AND BACK MOVEMENT
             if (speedForward >= speedForwardCap)
             {
@@ -213,11 +215,11 @@ public class ShipControls : MonoBehaviour
         //Interact Action
         if (Input.GetKey(KeyCode.F))
         {
-            interactFeild.SetActive(true);
+            //interactFeild.SetActive(true);
         }
         else
         {
-            interactFeild.SetActive(false);
+            //interactFeild.SetActive(false);
         }
 
         //LIGHT ACTION

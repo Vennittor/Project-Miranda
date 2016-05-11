@@ -1,8 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum EnemyState : byte {
+public enum EnemyIdentifier : byte {
 	NONE = 0,
+	NEUTRAL,
+	THREAT,
+	FOOD,
+	FAMILIAR
 }
 
 [RequireComponent(typeof(CharacterController))]
