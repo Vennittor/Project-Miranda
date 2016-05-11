@@ -23,7 +23,7 @@ public class ProbeController : MonoBehaviour
 	public float throttleSpeed = 1.0f;	//if velocity in any direction drops below this value, it well be set to zero
 	public float forwardAcc = 8.0f;
 	public float horAcc = 8.0f;
-	public float angularAcc = 5.0f;
+	public float rotateSpeed = 5.0f;
 
 	public float normalDrag = 1.0f;
 	public float normalAngularDrag = 1.0f;
@@ -34,7 +34,10 @@ public class ProbeController : MonoBehaviour
 	public float mousespeed = 5.0f;
 	public int currentLight = 0;
 
+	public bool reverseYInput = true;
+
 	private bool isControllable = true;
+
 
 	[Header("Scan")]
 	[SerializeField] float scanDelay = 1.0f;
@@ -55,31 +58,14 @@ public class ProbeController : MonoBehaviour
 	bool pressR = false;
 	bool PressF = false;
 	*/
-	//old variables
-//	public float forwardSpeed = 0.0f;
-//
-//	public float forwardDec = 1.0f;
-//	public float forwardCap = 25.0f;
-//
-//	public float horSpeed = 0.0f;
-//
-//	public float horDec = 1.0f;
-//	public float horCap = 25.0f;
-//
-//	public float rotSpeed = 0.0f;
-//	public float rotAcc = 8.0f;
-//	public float rotDec = 8.0f;
-//	public float rotCap = 60.0f;
-//
-//	public float defautlDec = 1.0f;
 	#endregion
 
 	void Start () 
 	{
 		rb = GetComponent<Rigidbody>();
 
-		normalDrag = rb.drag;
-		normalAngularDrag = rb.angularDrag;
+		rb.drag = normalDrag;
+		rb.angularDrag = normalAngularDrag;
 
 		GameManager.Instance.EvOnPauseSet += SetControllable;
 		Cursor.lockState = CursorLockMode.Locked;
@@ -101,9 +87,9 @@ public class ProbeController : MonoBehaviour
 			Stabilize ();
 
 			//Velocity information, testing only
-			ZSpeed = rb.velocity.z;
-			XSpeed = rb.velocity.x;
-			YSpeed = rb.velocity.y;
+			ZSpeed = currentVel.z;
+			XSpeed = currentVel.x;
+			YSpeed = currentVel.y;
 			// Why do these need to be allocated to separate values?
 			// Wrapping in a Vector3 would probably be okay.
 		}
@@ -111,18 +97,32 @@ public class ProbeController : MonoBehaviour
 
 	#region Update phases
 	void HandleComponentInput() {
-		if (Input.GetKeyDown(KeyCode.F)) {
+		if (Input.GetKeyDown(KeyCode.F)) 
+		{
 			StartCoroutine(Scan());
 		}
 
-		if (Input.GetKeyDown(KeyCode.R)) {
-			//ambientLight.enabled = !ambientLight.enabled;
+		if (Input.GetKeyDown(KeyCode.R)) 
+		{
+			ambientLight.enabled = !ambientLight.enabled;
 			spotLight.enabled = !spotLight.enabled;
 		}
+
+		if(Input.GetKeyDown(KeyCode.V))
+		{
+			reverseYInput = !reverseYInput;
+		}
+			
 	}
 
-	void UpdateMouselook() {
-		transform.Rotate(new Vector3(Input.GetAxis("Mouse Y"), Input.GetAxis("Mouse X") * mousespeed, 0));
+	void UpdateMouselook() 
+	{
+		Vector3 mouseAxis = new Vector3(Input.GetAxis("Mouse Y"), Input.GetAxis("Mouse X") * mousespeed, 0);
+
+		if (reverseYInput)
+			mouseAxis.x *= -1;
+
+		transform.Rotate(mouseAxis);
 	}
 
 	void ApplyForces()
@@ -148,10 +148,10 @@ public class ProbeController : MonoBehaviour
 		force = Vector3.zero;
 
 		if (Input.GetKey(KeyCode.Q)) 
-			force += angularAcc * -transform.right;
+			force += rotateSpeed * transform.forward;
 
 		if (Input.GetKey (KeyCode.E)) 
-			force += angularAcc * transform.right;
+			force += rotateSpeed * -transform.forward;
 
 		rb.AddTorque (force);
 
@@ -181,6 +181,8 @@ public class ProbeController : MonoBehaviour
 
 		//apply changes to velocity
 		rb.velocity = setVel;
+
+
 	}
 
 	void Stabilize()
