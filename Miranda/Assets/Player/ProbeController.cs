@@ -12,12 +12,8 @@ public class ProbeController : MonoBehaviour
 	public Light spotLight = null;
 
 	private Color defaultLightColor = Color.white;
-	[Header("Movement")]
-	//readout Variables,  for testing only
-	public float ZSpeed = 0.0f;
-	public float XSpeed = 0.0f;
-	public float YSpeed = 0.0f;
 
+	[Header("Movement")]
 	//velocity varialbes
 	public float moveSpeedMax = 10.0f;	//maximum speed allowed in any particular direction
 	public float throttleSpeed = 1.0f;	//if velocity in any direction drops below this value, it well be set to zero
@@ -27,38 +23,24 @@ public class ProbeController : MonoBehaviour
 
 	public float normalDrag = 1.0f;
 	public float normalAngularDrag = 1.0f;
-
 	public float stabilizeDrag = 5.0f;
 	public float stabilizeAngDrag = 5.0f;
 
 	public float mousespeed = 5.0f;
 	public int currentLight = 0;
 
+	[Header("Tools")]
+
+	public float laserRadius = 1.0f;
+	public float laserDistance = 10.0f;
+
+	[Header("Control Options")]
 	public bool reverseYInput = true;
 
 	private bool isControllable = true;
 
-
 	[Header("Scan")]
 	[SerializeField] float scanDelay = 1.0f;
-
-	#region Obselete stuff
-	//Input checks
-	/*
-	bool moveForward = false;
-	bool moveBackward = false;
-	bool moveLeft = false;
-	bool moveRight = false;
-
-	bool rotateLeft = false;
-	bool rotateRight = false;
-
-	bool stabilizer = false;
-
-	bool pressR = false;
-	bool PressF = false;
-	*/
-	#endregion
 
 	void Start () 
 	{
@@ -78,20 +60,14 @@ public class ProbeController : MonoBehaviour
 		}
 
 		if (isControllable) {
-			Vector3 currentVel = rb.velocity;
 
 			HandleComponentInput();
+			ActivateTools ();
 			UpdateMouselook();
 			ApplyForces ();
 			ThrottleVelocity ();
 			Stabilize ();
 
-			//Velocity information, testing only
-			ZSpeed = currentVel.z;
-			XSpeed = currentVel.x;
-			YSpeed = currentVel.y;
-			// Why do these need to be allocated to separate values?
-			// Wrapping in a Vector3 would probably be okay.
 		}
 	}
 
@@ -113,6 +89,38 @@ public class ProbeController : MonoBehaviour
 			reverseYInput = !reverseYInput;
 		}
 			
+	}
+
+	void ActivateTools()
+	{
+		if (Input.GetMouseButton(0))
+		{
+			StartCoroutine(Laser ());
+
+			Ray ray = new Ray();
+			ray.origin = this.gameObject.transform.position;
+			ray.direction = transform.forward;
+
+			RaycastHit hit;
+				
+			if (Physics.SphereCast (ray, laserRadius, out hit, laserDistance))
+			{
+				GameObject hitObject = hit.collider.gameObject;
+
+				if (hitObject.transform.parent != null)
+				{
+					GameObject hitParent = hitObject.transform.parent.gameObject;
+
+					if (hitParent.tag == "Destructable")
+					{
+						Destructable hitDestScript = hitParent.GetComponent<Destructable>();
+						hitDestScript.Break ();
+					}
+				}
+
+
+			}
+		}
 	}
 
 	void UpdateMouselook() 
@@ -142,7 +150,7 @@ public class ProbeController : MonoBehaviour
 		if (Input.GetKey (KeyCode.D)) 
 			force += horAcc * transform.right;
 
-		rb.AddForce (force);
+		rb.AddForce (force, ForceMode.Acceleration);
 
 		//Adjust Angular Velocities (Z Axis)
 		force = Vector3.zero;
@@ -153,7 +161,7 @@ public class ProbeController : MonoBehaviour
 		if (Input.GetKey (KeyCode.E)) 
 			force += rotateSpeed * -transform.forward;
 
-		rb.AddTorque (force);
+		rb.AddTorque (force, ForceMode.Acceleration);
 
 	}
 
@@ -201,6 +209,13 @@ public class ProbeController : MonoBehaviour
 
 	void SetControllable(bool mControllable) {
 		isControllable = !mControllable;
+	}
+
+	IEnumerator Laser()
+	{
+		interactField.SetVisible(true);
+		yield return new WaitForSeconds(scanDelay);
+		interactField.SetVisible(false);
 	}
 
 	IEnumerator Scan() {
