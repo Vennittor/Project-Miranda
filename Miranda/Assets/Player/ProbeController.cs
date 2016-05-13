@@ -10,6 +10,9 @@ public class ProbeController : MonoBehaviour
 	public PlayerScanner interactField = null;
 	public Light ambientLight = null;
 	public Light spotLight = null;
+	public Light indicatorLight = null;
+
+	public TestTeleport testTeleport = null;
 
 	private Color defaultLightColor = Color.white;
 
@@ -57,6 +60,9 @@ public class ProbeController : MonoBehaviour
 
 		GameManager.Instance.EvOnPauseSet += SetControllable;
 		Cursor.lockState = CursorLockMode.Locked;
+
+		if(gameObject.GetComponent<TestTeleport>() != null)
+			testTeleport = gameObject.GetComponent<TestTeleport>();
 	}
 	
 	void Update () 
@@ -127,7 +133,7 @@ public class ProbeController : MonoBehaviour
 
 			if (leftTool == 1)
 			{
-				StartCoroutine (Laser ());
+				StartCoroutine ( LaserAnimation () );
 
 				Ray ray = new Ray ();
 				ray.origin = this.gameObject.transform.position;
@@ -246,6 +252,12 @@ public class ProbeController : MonoBehaviour
 
 	void Tether()
 	{
+		//Tether ON
+		//Flash Tether effects
+		//If no Object, stop
+		//if object, continue tether
+		//StartCoroutine ( TetherAnimation() );
+
 		//Sphere Cast
 		//attach physics object to tether joint
 		//tetherJoint.connectedBody = other.gameobject;
@@ -254,9 +266,21 @@ public class ProbeController : MonoBehaviour
 	{
 		//detach tethered object from joint.
 		tetherJoint.connectedBody = null;
+		StopCoroutine ( TetherAnimation () );
+		//Tether OFF
 	}
 
-	IEnumerator Laser()
+	IEnumerator TetherAnimation()
+	{
+		//set indicator color
+		//turn indicator light on
+		//start particle effect
+
+
+		yield return new WaitForEndOfFrame();
+	}
+
+	IEnumerator LaserAnimation()
 	{
 		interactField.SetVisible(true);
 		yield return new WaitForSeconds(scanDelay);
