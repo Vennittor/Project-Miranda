@@ -22,6 +22,8 @@ public class ProbeController : MonoBehaviour
 	public float throttleSpeed = 1.0f;	//if velocity in any direction drops below this value, it well be set to zero
 	public float forwardAcc = 8.0f;
 	public float horAcc = 8.0f;
+	public float vertAcc = 8.0f;
+	public float shiftAcc = 1.5f;
 	public float rotateSpeed = 5.0f;
 
 	public float normalDrag = 1.0f;
@@ -188,19 +190,38 @@ public class ProbeController : MonoBehaviour
 
 		if (Input.GetKey (KeyCode.D)) 
 			force += horAcc * transform.right;
+		if(Input.GetKey (KeyCode.Space))
+		{
+			force += vertAcc * transform.up;
+		}
+		if (Input.GetKey (KeyCode.X)) 
+		{
+			force += vertAcc * -transform.up;
+		}
+
+		if (Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift)) 
+		{
+			force *= shiftAcc;
+		}
 
 		rb.AddForce (force, ForceMode.Acceleration);
 
 		//Adjust Angular Velocities (Z Axis)
 		force = Vector3.zero;
 
-		if (Input.GetKey(KeyCode.Q)) 
-			force += rotateSpeed * transform.forward;
+		if (Input.GetKey (KeyCode.Q)) 
+		{
+			transform.Rotate (Vector3.forward * rotateSpeed * Time.deltaTime);
+			//force += rotateSpeed * transform.forward;
+		}
 
-		if (Input.GetKey (KeyCode.E)) 
-			force += rotateSpeed * -transform.forward;
+		if (Input.GetKey (KeyCode.E))
+		{
+			transform.Rotate (-Vector3.forward * rotateSpeed * Time.deltaTime);
+			//force += rotateSpeed * -transform.forward;
+		}
 
-		rb.AddTorque (force, ForceMode.Acceleration);
+		//rb.AddTorque (force, ForceMode.Acceleration);
 
 	}
 
