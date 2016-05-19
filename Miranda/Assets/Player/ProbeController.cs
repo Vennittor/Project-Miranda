@@ -41,9 +41,20 @@ public class ProbeController : MonoBehaviour
 
 	public Joint tetherJoint = null;
 	public GameObject tetheredObject = null;
+	public bool flashingTether = false;
 
 	public float laserRadius = 1.0f;
 	public float laserDistance = 10.0f;
+	bool flashingLaser = false;
+	public float laserDelay = 1.0f;
+
+	[Header("  Tool Effects")]	 //Tool Particle Effects
+
+	public GameObject scanner = null;
+	public GameObject laser = null;
+	public GameObject tether = null;
+	public GameObject shield = null;
+	public GameObject teleport = null;
 
 	[Header("Control Options")]
 	public bool reverseYInput = true;
@@ -62,6 +73,14 @@ public class ProbeController : MonoBehaviour
 
 		GameManager.Instance.EvOnPauseSet += SetControllable;
 		Cursor.lockState = CursorLockMode.Locked;
+
+		scanner.SetActive(false);
+		laser.SetActive(false);
+		tether.SetActive(false);
+		shield.SetActive(false);
+		teleport.SetActive(false);
+
+		flashingLaser = false;
 
 		if(gameObject.GetComponent<TestTeleport>() != null)
 			testTeleport = gameObject.GetComponent<TestTeleport>();
@@ -126,7 +145,7 @@ public class ProbeController : MonoBehaviour
 		#endregion
 
 		//Left Tools
-		if (Input.GetMouseButton(0))
+		if (Input.GetMouseButtonDown(0))
 		{
 			if (leftTool == 0) 
 			{
@@ -135,7 +154,13 @@ public class ProbeController : MonoBehaviour
 
 			if (leftTool == 1)
 			{
-				StartCoroutine ( LaserAnimation () );
+				if( flashingLaser == false)
+				{
+					StartCoroutine ( LaserAnimation() );
+				}
+
+				laser.SetActive (true);
+				laser.GetComponent<ParticleSystem> ().Play ();
 
 				Ray ray = new Ray ();
 				ray.origin = this.gameObject.transform.position;
@@ -143,16 +168,27 @@ public class ProbeController : MonoBehaviour
 
 				RaycastHit hit;
 					
-				if (Physics.SphereCast (ray, laserRadius, out hit, laserDistance)) {
+				if (Physics.SphereCast (ray, laserRadius, out hit, laserDistance)) 
+				{
 					GameObject hitObject = hit.collider.gameObject;
 
-					if (hitObject.transform.parent != null) {
+					if (hitObject.transform.parent != null) 
+					{
 						GameObject hitParent = hitObject.transform.parent.gameObject;
 
-						if (hitParent.tag == "Destructable") {
+						if (hitParent.tag == "Destructable") 
+						{
 							Destructable hitDestScript = hitParent.GetComponent<Destructable> ();
 							hitDestScript.Break ();
 						}
+						/*
+						 * if( gameobject.GetCOmponent<IBurn>() == true)
+						 * {
+						 *      IBurn hitBurn = gameobject.GetComponent<IBurn>();
+						 *      hitBurn.Burn();
+						 * }
+						 * */
+
 					}
 				}
 			}
@@ -174,6 +210,7 @@ public class ProbeController : MonoBehaviour
 		transform.Rotate(mouseAxis);
 	}
 
+		#region Movement Forces
 	void ApplyForces()
 	{
 		Vector3 force = Vector3.zero;
@@ -225,6 +262,7 @@ public class ProbeController : MonoBehaviour
 
 	}
 
+
 	void ThrottleVelocity()
 	{
 		//Get current Velocity
@@ -263,8 +301,10 @@ public class ProbeController : MonoBehaviour
 			rb.drag = normalDrag;
 			rb.angularDrag = normalAngularDrag;
 		}
-	
+
+
 	}
+		#endregion
 	#endregion
 
 	void SetControllable(bool mControllable) {
@@ -273,39 +313,40 @@ public class ProbeController : MonoBehaviour
 
 	void Tether()
 	{
-		//Tether ON
 		//Flash Tether effects
 		//If no Object, stop
 		//if object, continue tether
-		//StartCoroutine ( TetherAnimation() );
 
 		//Sphere Cast
 		//attach physics object to tether joint
 		//tetherJoint.connectedBody = other.gameobject;
+
+		tether.SetActive (true);
 	}
 	void TetherRelease()
 	{
 		//detach tethered object from joint.
-		tetherJoint.connectedBody = null;
-		StopCoroutine ( TetherAnimation () );
-		//Tether OFF
+		//tetherJoint.connectedBody = null;
+
+		tether.SetActive (false);
 	}
 
-	IEnumerator TetherAnimation()
+	void Laser()
 	{
-		//set indicator color
-		//turn indicator light on
-		//start particle effect
 
-
-		yield return new WaitForEndOfFrame();
 	}
-
 	IEnumerator LaserAnimation()
 	{
-		interactField.SetVisible(true);
-		yield return new WaitForSeconds(scanDelay);
-		interactField.SetVisible(false);
+		flashingLaser = true;
+		//do startup flash of animation
+		laser.SetActive(true);
+
+		yield return new WaitForSeconds(laserDelay);
+
+		laser.SetActive(false);
+
+		flashingLaser = false;
+		//stop animation
 	}
 
 	IEnumerator Scan() {
