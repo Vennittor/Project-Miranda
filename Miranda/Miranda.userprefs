@@ -1,8 +1,8 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Player\ProbeController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Enemy/Seeker/Seeker.cs">
     <Files>
-      <File FileName="Assets\Player\ProbeController.cs" Line="204" Column="22" />
+      <File FileName="Assets/Enemy/Seeker/Seeker.cs" Line="38" Column="17" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

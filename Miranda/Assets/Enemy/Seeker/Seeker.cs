@@ -20,6 +20,9 @@ public class Seeker : Enemy {
 
 	Vector3 homePos = Vector3.zero;
 
+	#region Properties
+	#endregion
+
 	#region IScannable
 	public override void OnScanned() {
 		base.OnScanned();
@@ -31,6 +34,8 @@ public class Seeker : Enemy {
 		homePos = _transform.position;
 		seekerState = SeekerState.IDLE;
 	}
+
+	void Update() {}
 	#endregion
 
 	#region Enemy
@@ -43,7 +48,6 @@ public class Seeker : Enemy {
 			UpdateIdle();
 			break;
 		case SeekerState.PURSUE:
-			Debug.Log("ayylmao");
 			UpdatePursue();
 			break;
 		}
@@ -60,10 +64,12 @@ public class Seeker : Enemy {
 			// TEMPORARY - return to home pos
 			_transform.position = Vector3.MoveTowards(
 				_transform.position,homePos,Time.fixedDeltaTime * wanderSpeed);
+			_transform.LookAt(homePos);
 		}
 	}
 
 	void UpdatePursue() {
+		_transform.LookAt(player.transform);
 		_transform.position = Vector3.MoveTowards(
 			_transform.position,player.transform.position,Time.fixedDeltaTime * pursuitSpeed);
 		if (!PlayerIsNear())
