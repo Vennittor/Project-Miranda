@@ -39,6 +39,8 @@ public class ProbeController : MonoBehaviour
 	public int leftTool = 0;
 	public int rightTool = 0;
 
+	public bool scanning = false;
+
 	public Joint tetherJoint = null;
 	public GameObject tetheredObject = null;
 	public bool flashingTether = false;
@@ -51,6 +53,7 @@ public class ProbeController : MonoBehaviour
 	[Header("  Tool Effects")]	 //Tool Particle Effects
 
 	public GameObject scanner = null;
+	public ParticleSystem scannerPart = null;
 	public GameObject laser = null;
 	public GameObject tether = null;
 	public GameObject shield = null;
@@ -78,9 +81,13 @@ public class ProbeController : MonoBehaviour
 		laser.SetActive(false);
 		tether.SetActive(false);
 		shield.SetActive(false);
-		teleport.SetActive(false);
+		//teleport.SetActive(false);
 
 		flashingLaser = false;
+
+		scannerPart = scanner.GetComponent<ParticleSystem> ();
+
+
 
 		if(gameObject.GetComponent<TestTeleport>() != null)
 			testTeleport = gameObject.GetComponent<TestTeleport>();
@@ -108,7 +115,8 @@ public class ProbeController : MonoBehaviour
 	void HandleComponentInput() {
 		if (Input.GetKeyDown(KeyCode.F)) 
 		{
-			StartCoroutine(Scan());
+			if( !scanning )
+			StartCoroutine( Scan() );
 		}
 
 		if (Input.GetKeyDown(KeyCode.R)) 
@@ -145,6 +153,11 @@ public class ProbeController : MonoBehaviour
 		#endregion
 
 		//Left Tools
+		if (Input.GetMouseButtonUp (0)) 
+		{
+			TetherRelease ();
+		}
+
 		if (Input.GetMouseButtonDown(0))
 		{
 			if (leftTool == 0) 
@@ -152,52 +165,28 @@ public class ProbeController : MonoBehaviour
 				Tether ();
 			}
 
+			//Laser
 			if (leftTool == 1)
 			{
-				if( flashingLaser == false)
-				{
-					StartCoroutine ( LaserAnimation() );
-				}
-
-				laser.SetActive (true);
-				laser.GetComponent<ParticleSystem> ().Play ();
-
-				Ray ray = new Ray ();
-				ray.origin = this.gameObject.transform.position;
-				ray.direction = transform.forward;
-
-				RaycastHit hit;
-					
-				if (Physics.SphereCast (ray, laserRadius, out hit, laserDistance)) 
-				{
-					GameObject hitObject = hit.collider.gameObject;
-
-					if (hitObject.transform.parent != null) 
-					{
-						GameObject hitParent = hitObject.transform.parent.gameObject;
-
-						if (hitParent.tag == "Destructable") 
-						{
-							Destructable hitDestScript = hitParent.GetComponent<Destructable> ();
-							hitDestScript.Break ();
-						}
-						/*
-						 * if( gameobject.GetCOmponent<IBurn>() == true)
-						 * {
-						 *      IBurn hitBurn = gameobject.GetComponent<IBurn>();
-						 *      hitBurn.Burn();
-						 * }
-						 * */
-
-					}
-				}
+				Laser ();
 			}
 		}
 
-		if (Input.GetMouseButtonUp (0)) 
+		//Right Tools
+		if(Input.GetMouseButtonDown(1))
 		{
-			TetherRelease ();
+			if (leftTool == 0) 
+			{
+				//Shield();
+			}
+
+			if (leftTool == 1) 
+			{
+				//Teleport();
+			}
 		}
+
+
 	}
 
 	void UpdateMouselook() 
@@ -311,6 +300,21 @@ public class ProbeController : MonoBehaviour
 		isControllable = !mControllable;
 	}
 
+	IEnumerator Scan() 
+	{
+		scanning = true;
+		scanner.SetActive(true);
+		//interactField.SetVisible(true);
+
+		yield return new WaitForSeconds(scanDelay);
+
+		interactField.PerformScanOnAll();
+//		interactField.SetVisible(false);
+		scanner.SetActive(false);
+
+		scanning = false;
+	}
+
 	void Tether()
 	{
 		//Flash Tether effects
@@ -333,7 +337,31 @@ public class ProbeController : MonoBehaviour
 
 	void Laser()
 	{
+		if( flashingLaser == false)
+		{
+			StartCoroutine ( LaserAnimation() );
+		}
 
+		Ray ray = new Ray ();
+		ray.origin = this.gameObject.transform.position;
+		ray.direction = transform.forward;
+
+		RaycastHit hit;
+
+		if (Physics.SphereCast (ray, laserRadius, out hit, laserDistance)) 
+		{
+			GameObject hitObject = hit.collider.gameObject;
+
+			while (hitObject.transform.parent != null)
+			{
+				hitObject = hitObject.transform.parent.gameObject;
+			}
+
+			if( hitObject.GetComponent<IBurn>() != null)
+			{
+				hitObject.GetComponent<IBurn>().Burn();
+			}
+		}
 	}
 	IEnumerator LaserAnimation()
 	{
@@ -349,10 +377,13 @@ public class ProbeController : MonoBehaviour
 		//stop animation
 	}
 
-	IEnumerator Scan() {
-		interactField.SetVisible(true);
-		yield return new WaitForSeconds(scanDelay);
-		interactField.PerformScanOnAll();
-		interactField.SetVisible(false);
+	void Shield()
+	{
+
+	}
+
+	void Teleport()
+	{
+
 	}
 }
