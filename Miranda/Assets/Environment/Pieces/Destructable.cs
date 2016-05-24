@@ -1,22 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Destructable : MonoBehaviour 
+public class Destructable : MonoBehaviour, IBurn
 {
 	public GameObject brokenPiece = null;
 
-
-	void Start () 
-	{
-	
-	}
-	
-	void Update () 
-	{
-	
-	}
-
-	public void Break()
+	public void Burn()
 	{
 		GameObject loadedPiece = Instantiate (brokenPiece) as GameObject;
 
