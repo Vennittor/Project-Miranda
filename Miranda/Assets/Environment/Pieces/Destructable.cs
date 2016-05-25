@@ -7,11 +7,11 @@ public class Destructable : MonoBehaviour, IBurn
 
 	public void Burn()
 	{
-		GameObject loadedPiece = Instantiate (brokenPiece) as GameObject;
+			GameObject loadedPiece = Instantiate (brokenPiece) as GameObject;
 
-		loadedPiece.transform.DetachChildren ();
-		Destroy (loadedPiece);
+			loadedPiece.transform.DetachChildren ();
+			Destroy (loadedPiece);
 
-		Destroy (this.gameObject);
+			Destroy (this.gameObject);
 	}
 }
