@@ -12,6 +12,8 @@ public class ProbeController : MonoBehaviour
 	public Light spotLight = null;
 	public Light indicatorLight = null;
 
+	private int interactableLayer = 9;
+
 	public TestTeleport testTeleport = null;
 
 	private Color defaultLightColor = Color.white;
@@ -41,14 +43,23 @@ public class ProbeController : MonoBehaviour
 
 	public bool scanning = false;
 
-	public Joint tetherJoint = null;
+	public bool useTetherJoint = true;
+	public GameObject tetherGO = null;
+	SpringJoint tetherJoint = null;
 	public GameObject tetheredObject = null;
-	public bool flashingTether = false;
+	public float tetherGrabRange = 0.7f;
+	private bool flashingTether = false;
+	private bool tethering = false;
 
 	public float laserRadius = 1.0f;
 	public float laserDistance = 10.0f;
 	bool flashingLaser = false;
 	public float laserDelay = 1.0f;
+	private bool mining = false;
+
+	private bool teleporting = false;
+
+	private bool shielded = false;
 
 	[Header("  Tool Effects")]	 //Tool Particle Effects
 
@@ -77,6 +88,8 @@ public class ProbeController : MonoBehaviour
 		GameManager.Instance.EvOnPauseSet += SetControllable;
 		Cursor.lockState = CursorLockMode.Locked;
 
+		interactableLayer = LayerMask.NameToLayer("Interactable");
+
 		scanner.SetActive(false);
 		laser.SetActive(false);
 		tether.SetActive(false);
@@ -87,7 +100,7 @@ public class ProbeController : MonoBehaviour
 
 		scannerPart = scanner.GetComponent<ParticleSystem> ();
 
-
+		tetherJoint = tetherGO.GetComponent<SpringJoint> ();
 
 		if(gameObject.GetComponent<TestTeleport>() != null)
 			testTeleport = gameObject.GetComponent<TestTeleport>();
@@ -115,8 +128,11 @@ public class ProbeController : MonoBehaviour
 	void HandleComponentInput() {
 		if (Input.GetKeyDown(KeyCode.F)) 
 		{
-			if( !scanning )
-			StartCoroutine( Scan() );
+			if(tethering)
+				TetherRelease();
+			
+			if( !scanning && !mining )
+				StartCoroutine( Scan() );
 		}
 
 		if (Input.GetKeyDown(KeyCode.R)) 
@@ -137,8 +153,11 @@ public class ProbeController : MonoBehaviour
 		#region Tool Switch Temp
 		if (Input.GetKeyDown (KeyCode.Z)) 
 		{
-			if(leftTool == 0)
+			if(tethering)
 				TetherRelease();
+
+			if(teleporting)
+				TeleportOff();
 			
 			leftTool++;
 			if (leftTool > 1)
@@ -146,6 +165,9 @@ public class ProbeController : MonoBehaviour
 		}
 		if (Input.GetKeyDown (KeyCode.C)) 
 		{
+			if(teleporting)
+				TeleportOff();
+
 			rightTool++;
 			if(rightTool > 1)
 				rightTool = 0;
@@ -162,12 +184,17 @@ public class ProbeController : MonoBehaviour
 		{
 			if (leftTool == 0) 
 			{
-				Tether ();
+				TeleportOff ();
+
+				if( !flashingLaser)
+					Tether ();
 			}
 
 			//Laser
 			if (leftTool == 1)
 			{
+				TeleportOff();
+
 				Laser ();
 			}
 		}
@@ -175,15 +202,27 @@ public class ProbeController : MonoBehaviour
 		//Right Tools
 		if(Input.GetMouseButtonDown(1))
 		{
-			if (leftTool == 0) 
+			if (rightTool == 0) 
 			{
-				//Shield();
+				
+				ShieldOn ();
 			}
 
-			if (leftTool == 1) 
+			if (rightTool == 1) 
 			{
-				//Teleport();
+				if(!teleporting)
+					TeleportOn();
 			}
+		}
+
+		if (Input.GetMouseButtonUp (1))
+		{
+			ShieldOff ();
+
+			if ( ValidTeleport () )
+				Teleport ();
+			else
+				TeleportOff();
 		}
 
 
@@ -321,17 +360,64 @@ public class ProbeController : MonoBehaviour
 		//If no Object, stop
 		//if object, continue tether
 
-		//Sphere Cast
-		//attach physics object to tether joint
-		//tetherJoint.connectedBody = other.gameobject;
+		Ray ray = new Ray ();
+		ray.origin = this.gameObject.transform.position;
+		ray.direction = transform.forward;
+
+		RaycastHit hit;
+		float castDist = Vector3.Distance(ray.origin, tetherGO.transform.position);
+
+		if ( Physics.SphereCast(ray, tetherGrabRange, out hit, castDist) ) 
+		{
+			GameObject hitObject = hit.collider.gameObject;
+
+			while (hitObject.transform.parent != null)
+			{
+				hitObject = hitObject.transform.parent.gameObject;
+			}
+
+			if( hitObject.GetComponent<ITether>() != null)
+				hitObject.GetComponent<ITether>().Tether();
+
+			if (hitObject.layer == interactableLayer && hitObject.GetComponent<Rigidbody>() != null)
+			{
+				tetheredObject = hitObject;
+
+				tetherGO.SetActive (true);
+				if (useTetherJoint) 
+				{
+					tetherJoint.connectedBody = tetheredObject.GetComponent<Rigidbody> ();
+				}
+				else 
+				{
+					tetheredObject.transform.SetParent(tetherGO.transform, true);
+					tetheredObject.transform.position = tetherGO.transform.position;
+					//move to tetherGO
+				}
+				tetheredObject.GetComponent<Rigidbody> ().useGravity = false;
+			}
+
+		}
 
 		tether.SetActive (true);
 	}
 	void TetherRelease()
 	{
-		//detach tethered object from joint.
-		//tetherJoint.connectedBody = null;
+		if (tetheredObject != null) 
+		{
+			if (useTetherJoint) 
+			{
+				tetherJoint.connectedBody = null;
+			}
+			else
+			{
+				tetheredObject.transform.SetParent (null, true);
+			}
+			tetheredObject.GetComponent<Rigidbody> ().useGravity = true;
+		}
+		tetherGO.SetActive(false);
 
+		tethering = false;
 		tether.SetActive (false);
 	}
 
@@ -341,6 +427,16 @@ public class ProbeController : MonoBehaviour
 		{
 			StartCoroutine ( LaserAnimation() );
 		}
+
+
+	}
+	IEnumerator LaserAnimation()
+	{
+		flashingLaser = true;
+		//do startup flash of animation
+		laser.SetActive(true);
+
+		yield return new WaitForSeconds(laserDelay);
 
 		Ray ray = new Ray ();
 		ray.origin = this.gameObject.transform.position;
@@ -362,14 +458,6 @@ public class ProbeController : MonoBehaviour
 				hitObject.GetComponent<IBurn>().Burn();
 			}
 		}
-	}
-	IEnumerator LaserAnimation()
-	{
-		flashingLaser = true;
-		//do startup flash of animation
-		laser.SetActive(true);
-
-		yield return new WaitForSeconds(laserDelay);
 
 		laser.SetActive(false);
 
@@ -377,13 +465,52 @@ public class ProbeController : MonoBehaviour
 		//stop animation
 	}
 
-	void Shield()
+	void ShieldOn()
 	{
+		shielded = true;
 
+		shield.SetActive (true);
+	}
+
+	void ShieldOff()
+	{
+		shielded = false;
+
+		shield.SetActive (false);
+	}
+
+	void TeleportOn()
+	{
+		teleporting = true;
+		//if not teleporting
+			//turn on Teleport child Object
+			//switch controls to Teleport Child Object
+
+				//if not Run Teleport
+				//Else TeleportOff();
+	}
+
+	bool ValidTeleport()
+	{
+		//SphereCast to check if within other objects
+		//if no invlaid objects
+			//return true;
+		//else
+			return false;
 	}
 
 	void Teleport()
 	{
+		//Run Teleport effects
+		//Move Probe to Teleport location
+		//return Teleport Effect to Probe center
+		//TeleportOff();
+	}
 
+	void TeleportOff()
+	{
+		teleporting = false;
+		//return control to Probe
+		//Teleport Effect Off
 	}
 }
