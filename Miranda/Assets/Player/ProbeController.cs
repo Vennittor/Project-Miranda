@@ -9,6 +9,7 @@ public class ProbeController : MonoBehaviour
 
 	public PlayerScanner interactField = null;
 	public Light ambientLight = null;
+	public Light probeLight = null;
 	public Light spotLight = null;
 	public Light indicatorLight = null;
 
@@ -37,7 +38,11 @@ public class ProbeController : MonoBehaviour
 	public int currentLight = 0;
 
 	[Header("Tools")]
-	//Temp variables change to Enumerators and a List of current tools.
+
+	public bool lightsOn = true;
+	public float probeLit = 1.15f;
+	public float probeDark = 0.2f;
+
 	public int leftTool = 0;
 	public int rightTool = 0;
 
@@ -137,8 +142,14 @@ public class ProbeController : MonoBehaviour
 
 		if (Input.GetKeyDown(KeyCode.R)) 
 		{
+			lightsOn = !lightsOn;
 			ambientLight.enabled = !ambientLight.enabled;
 			spotLight.enabled = !spotLight.enabled;
+
+			if(lightsOn)
+				probeLight.intensity = probeLit;
+			if (!lightsOn)
+				probeLight.intensity = probeDark;
 		}
 
 		if(Input.GetKeyDown(KeyCode.V))
@@ -371,30 +382,42 @@ public class ProbeController : MonoBehaviour
 		{
 			GameObject hitObject = hit.collider.gameObject;
 
-			while (hitObject.transform.parent != null)
+			bool objTetherable = false;
+
+			while (!objTetherable)
 			{
-				hitObject = hitObject.transform.parent.gameObject;
-			}
 
-			if( hitObject.GetComponent<ITether>() != null)
-				hitObject.GetComponent<ITether>().Tether();
-
-			if (hitObject.layer == interactableLayer && hitObject.GetComponent<Rigidbody>() != null)
-			{
-				tetheredObject = hitObject;
-
-				tetherGO.SetActive (true);
-				if (useTetherJoint) 
+				if (hitObject.GetComponent<ITether> () != null) 
 				{
-					tetherJoint.connectedBody = tetheredObject.GetComponent<Rigidbody> ();
-				}
-				else 
+					hitObject.GetComponent<ITether> ().Tether ();
+					objTetherable = true;
+				} 
+
+				if (hitObject.layer == interactableLayer && hitObject.GetComponent<Rigidbody> () != null) 
 				{
-					tetheredObject.transform.SetParent(tetherGO.transform, true);
-					tetheredObject.transform.position = tetherGO.transform.position;
-					//move to tetherGO
+					tetheredObject = hitObject;
+
+					tetherGO.SetActive (true);
+					if (useTetherJoint)
+					{
+						tetherJoint.connectedBody = tetheredObject.GetComponent<Rigidbody> ();
+					} 
+					else 
+					{
+						tetheredObject.transform.SetParent (tetherGO.transform, true);
+						tetheredObject.transform.position = tetherGO.transform.position;
+						//move to tetherGO
+					}
+					tetheredObject.GetComponent<Rigidbody> ().useGravity = false;
+
+					objTetherable = true;
 				}
-				tetheredObject.GetComponent<Rigidbody> ().useGravity = false;
+				else if(hitObject.transform.parent != null)
+				{
+					hitObject = hitObject.transform.parent.gameObject;
+				}
+				else
+					break;
 			}
 
 		}
@@ -448,15 +471,27 @@ public class ProbeController : MonoBehaviour
 		{
 			GameObject hitObject = hit.collider.gameObject;
 
-			while (hitObject.transform.parent != null)
+			if (hitObject.GetComponent<IBurn> () != null) {
+				print ("burn");
+				hitObject.GetComponent<IBurn> ().Burn ();
+
+			} 
+			else 
 			{
-				hitObject = hitObject.transform.parent.gameObject;
+				while (hitObject.transform.parent != null) 
+				{
+					hitObject = hitObject.transform.parent.gameObject;
+
+					if (hitObject.GetComponent<IBurn> () != null) 
+					{
+						print ("burn");
+						hitObject.GetComponent<IBurn> ().Burn ();
+						break;
+					}
+				}
 			}
 
-			if( hitObject.GetComponent<IBurn>() != null)
-			{
-				hitObject.GetComponent<IBurn>().Burn();
-			}
+
 		}
 
 		laser.SetActive(false);
