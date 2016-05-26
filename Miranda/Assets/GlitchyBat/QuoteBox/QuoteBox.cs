@@ -189,6 +189,15 @@ public class QuoteBox : MonoBehaviour {
 	}
 	#endregion
 
+	public void Reset() {
+		if (!isLocked) {
+			Open();
+			QuotePayload tEmpty = QuotePayload.Uninitialized;
+			//tEmpty.Text[0].Text = "";
+			StartCoroutine(IterateChunk(tEmpty.Text));
+		}
+	}
+
 	#region Inner text handling
 	Queue<char> QueueText(string mText) {
 		Queue<char> newText = new Queue<char>();
