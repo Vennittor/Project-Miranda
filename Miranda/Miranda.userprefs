@@ -2,8 +2,7 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Environment\Interactable Pieces\Scannable.cs">
     <Files>
-      <File FileName="Assets\Player\ProbeController.cs" Line="145" Column="25" />
-      <File FileName="Assets\Environment\Interactable Pieces\Scannable.cs" Line="31" Column="22" />
+      <File FileName="Assets\Environment\Interactable Pieces\Scannable.cs" Line="13" Column="38" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
