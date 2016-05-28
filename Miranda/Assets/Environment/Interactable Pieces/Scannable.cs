@@ -6,6 +6,8 @@ public class Scannable : MonoBehaviour, IScannable
 {
 	bool beenScanned = false;
 
+	public MonoBehaviour eventScript = null;
+
 	Renderer _renderer = null;
 	Color baseColor = Color.white;
 	public Color scanColor = Color.blue;
@@ -31,9 +33,15 @@ public class Scannable : MonoBehaviour, IScannable
 		beenScanned = true;
 		StartCoroutine(ChangeColor(scanColor));
 		QuoteBoxManager.Instance.ShowText(message);
+
+		if (eventScript != null) 
+		{
+			//eventScript.Event ();
+		}
 	}
 
-	IEnumerator ChangeColor(Color mColor) {
+	IEnumerator ChangeColor(Color mColor) 
+	{
 		_renderer.material.color = mColor;
 		yield return new WaitForSeconds(1.0f);
 		_renderer.material.color = baseColor;
