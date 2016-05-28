@@ -19,8 +19,13 @@ public class Scannable : MonoBehaviour, IScannable
 	QuotePayload message = QuotePayload.Uninitialized;
 
 	void Awake() {
-		_renderer = GetComponent<Renderer>();
-		baseColor = GetComponent<Renderer>().material.color;
+
+		if (GetComponent<Renderer> () != null)
+		{
+			_renderer = GetComponent<Renderer> ();
+
+			baseColor = GetComponent<Renderer> ().material.color;
+		}
 	}
 
 	void Start()
@@ -42,9 +47,14 @@ public class Scannable : MonoBehaviour, IScannable
 
 	IEnumerator ChangeColor(Color mColor) 
 	{
-		_renderer.material.color = mColor;
-		yield return new WaitForSeconds(1.0f);
-		_renderer.material.color = baseColor;
+		if (_renderer != null) 
+			_renderer.material.color = mColor;
+		
+			yield return new WaitForSeconds (1.0f);
+
+		if (_renderer != null) 
+			_renderer.material.color = baseColor;
+
 	}
 
 	IEnumerator FlashColor()
