@@ -19,7 +19,7 @@ public class LodgedObject : MonoBehaviour, ITether
 
 	public void Tether()
 	{
-		rb.isKinematic = false;
 		rb.useGravity = true;
+		rb.isKinematic = false;
 	}
 }

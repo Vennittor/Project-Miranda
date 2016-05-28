@@ -1,10 +1,10 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Boot/BootSequence.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Player\PlayerScanner.cs">
     <Files>
-      <File FileName="Assets/Boot/BootSequence.cs" Line="32" Column="33" />
-      <File FileName="Assets/GlitchyBat/QuoteBox/QuoteBoxManager.cs" Line="16" Column="8" />
-      <File FileName="Assets/GlitchyBat/QuoteBox/QuoteBox.cs" Line="196" Column="6" />
+      <File FileName="Assets\Player\ProbeController.cs" Line="361" Column="16" />
+      <File FileName="Assets\Player\PlayerScanner.cs" Line="31" Column="43" />
+      <File FileName="Assets\Environment\Interactable Pieces\Scannable.cs" Line="39" Column="42" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
