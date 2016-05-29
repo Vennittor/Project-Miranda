@@ -1,10 +1,8 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Player\PlayerScanner.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Environment\Interactable Pieces\Scannable.cs">
     <Files>
-      <File FileName="Assets\Player\ProbeController.cs" Line="361" Column="16" />
-      <File FileName="Assets\Player\PlayerScanner.cs" Line="31" Column="43" />
-      <File FileName="Assets\Environment\Interactable Pieces\Scannable.cs" Line="39" Column="42" />
+      <File FileName="Assets\Environment\Interactable Pieces\Scannable.cs" Line="13" Column="32" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

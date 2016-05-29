@@ -6,7 +6,8 @@ public class Scannable : MonoBehaviour, IScannable
 {
 	bool beenScanned = false;
 
-	public MonoBehaviour eventScript = null;
+	public IEvent eventScript = null;
+	public IBurn burnScript = null;
 
 	Renderer _renderer = null;
 	Color baseColor = Color.white;
@@ -41,7 +42,7 @@ public class Scannable : MonoBehaviour, IScannable
 
 		if (eventScript != null) 
 		{
-			//eventScript.Event ();
+			eventScript.StartEvent ();
 		}
 	}
 
