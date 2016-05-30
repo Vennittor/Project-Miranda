@@ -7,8 +7,12 @@ public class QuotePayload {
 	[SerializeField]
 	List<QuoteChunk> fullText = new List<QuoteChunk>();
 
+	[SerializeField]
+	bool freezeGame = false;
+
 	#region Properties
 	public List<QuoteChunk> Text {get{return fullText;}}
+	public bool FreezeGame {get{return freezeGame;}}
 	#endregion
 
 	#region Globals

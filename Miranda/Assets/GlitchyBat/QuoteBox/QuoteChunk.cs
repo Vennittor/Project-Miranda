@@ -10,9 +10,13 @@ public class QuoteChunk {
 	[SerializeField]
 	bool clearOnEnd = true;
 
+	//[SerializeField]
+	float timeDelay = 0f;
+
 	#region Properties
 	public string Text {get{return textChunk;}}
 	public bool ClearOnEnd {get{return clearOnEnd;}}
+	public float TimeDelay {get{return timeDelay;}}
 	#endregion
 
 	#region Globals

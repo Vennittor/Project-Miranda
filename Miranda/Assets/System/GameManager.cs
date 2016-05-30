@@ -15,8 +15,8 @@ public class GameManager : Singleton<GameManager> {
 
 	#region MonoBehaviour
 	void Start() {
-		QuoteBoxManager.Instance.DefaultQuoteBox.EvOnOpen += Pause;
-		QuoteBoxManager.Instance.DefaultQuoteBox.EvOnClose += Resume;
+		//QuoteBoxManager.Instance.DefaultQuoteBox.EvOnOpen += Pause;
+		//QuoteBoxManager.Instance.DefaultQuoteBox.EvOnClose += Resume;
 	}
 
 	void OnDestroy() {
@@ -24,15 +24,17 @@ public class GameManager : Singleton<GameManager> {
 	}
 	#endregion
 
-	void Pause() {
+	public void Pause() {
 		isPaused = true;
 		if (EvOnPauseSet != null)
 			EvOnPauseSet(isPaused);
+		Time.timeScale = 0f;
 	}
 
-	void Resume() {
+	public void Resume() {
 		isPaused = false;
 		if (EvOnPauseSet != null)
 			EvOnPauseSet(isPaused);
+		Time.timeScale = 1f;
 	}
 }

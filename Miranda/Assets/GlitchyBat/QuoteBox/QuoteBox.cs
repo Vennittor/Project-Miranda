@@ -131,32 +131,50 @@ public class QuoteBox : MonoBehaviour {
 		Close();
 	}
 	#endregion
+	
+	void AttemptPause(bool mToPause) {
+		if (mToPause)
+			GameManager.Instance.Pause();
+	}
+
+	void AttemptResume(bool mToResume) {
+		if (mToResume)
+			GameManager.Instance.Resume();
+	}
 
 	#region ShowText
 	public void ShowText(QuotePayload mDialogue) {
 		if (!isLocked) {
 			Open();
-			StartCoroutine(IterateChunk(mDialogue.Text));
+			StartCoroutine(IterateChunk(mDialogue));
 		}
 	}
 
-	IEnumerator IterateChunk(List<QuoteChunk> mChunks) {
+	IEnumerator IterateChunk(QuotePayload mDialogue) {
+		List<QuoteChunk> mChunks = mDialogue.Text;
+		AttemptPause(mDialogue.FreezeGame);
 		bool isWaitingForResume = false;
 		foreach (QuoteChunk c in mChunks) {
 			yield return StartCoroutine(TypeText(c.Text));
 			yield return null; // skip a frame so button presses from TypeText() don't bleed here
 			// LAZY loop until player input says to resume to the next chunk
 			isWaitingForResume = true;
-			while(isWaitingForResume) {
-				if (CustomInput.GetButtonDown(QuoteBoxManager.Instance.ButtonConfirm)
-					|| CustomInput.GetButtonDown(QuoteBoxManager.Instance.ButtonDeny))
-					isWaitingForResume = false;
-				yield return null;
+			// LAZY HACK - if a delay time is set, ignore input and just wait for a time.
+			if (c.TimeDelay == 0f) {
+				while(isWaitingForResume) {
+					if (CustomInput.GetButtonDown(QuoteBoxManager.Instance.ButtonConfirm)
+						|| CustomInput.GetButtonDown(QuoteBoxManager.Instance.ButtonDeny))
+						isWaitingForResume = false;
+					yield return null;
+				}
+			} else if (c.TimeDelay < 0f) {
+				yield return new WaitForSeconds(c.TimeDelay);
 			}
 			if (c.ClearOnEnd)
 				Clear();
 			else PutChar(char.Parse("\n"));
 		}
+		AttemptResume(mDialogue.FreezeGame);
 		Close();
 	}
 
@@ -181,7 +199,7 @@ public class QuoteBox : MonoBehaviour {
 
 			PutChar(c);
 			RefreshQuoteText();
-			yield return new WaitForSeconds(TextSpeedAsTime(tTextSpeed));
+			yield return new WaitForSeconds(TextSpeedAsTime(tTextSpeed) * Time.timeScale);
 		}
 
 		if (EvOnLineFinished != null)
@@ -194,7 +212,7 @@ public class QuoteBox : MonoBehaviour {
 			Open();
 			QuotePayload tEmpty = QuotePayload.Uninitialized;
 			//tEmpty.Text[0].Text = "";
-			StartCoroutine(IterateChunk(tEmpty.Text));
+			StartCoroutine(IterateChunk(tEmpty));
 		}
 	}
 
