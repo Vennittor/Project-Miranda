@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class ProbeController : MonoBehaviour
 {
@@ -210,6 +211,17 @@ public class ProbeController : MonoBehaviour
 			}
 		}
 
+		if (Input.GetMouseButton (0) )
+		{
+			if(leftTool == 0)
+			{
+				if (!flashingLaser && tetheredObject == null)
+					Tether ();
+
+			}
+
+		}
+
 		//Right Tools
 		if(Input.GetMouseButtonDown(1))
 		{
@@ -371,57 +383,75 @@ public class ProbeController : MonoBehaviour
 		//If no Object, stop
 		//if object, continue tether
 
-		Ray ray = new Ray ();
-		ray.origin = this.gameObject.transform.position;
-		ray.direction = transform.forward;
+		if(tetheredObject != null)
+			return;
 
-		RaycastHit hit;
-		float castDist = Vector3.Distance(ray.origin, tetherGO.transform.position);
+		List<Collider> hitColliders = new List<Collider> ();
+		hitColliders.AddRange( Physics.OverlapSphere(tetherGO.transform.position, tetherGrabRange) );
 
-		if ( Physics.SphereCast(ray, tetherGrabRange, out hit, castDist) ) 
+		GameObject hitObject = null;
+		Vector3 tetherPos = tetherGO.transform.position;
+		float closestDist = 0f;
+
+		if(hitColliders[0] != null)
 		{
-			GameObject hitObject = hit.collider.gameObject;
-
-			bool objTetherable = false;
-
-			while (!objTetherable)
+			hitObject = hitColliders[0].gameObject;
+			closestDist = Vector3.Distance (tetherPos, hitObject.transform.position);
+		
+			foreach (Collider collider in hitColliders)
 			{
+				if (collider == hitColliders [0])
+					continue;
 
-				if (hitObject.GetComponent<ITether> () != null) 
+				Vector3 hitPos = collider.gameObject.transform.position;
+				float dist = Vector3.Distance (tetherPos, hitPos);
+
+				if (dist < closestDist)
 				{
-					hitObject.GetComponent<ITether> ().Tether ();
-					objTetherable = true;
-				} 
-
-				if (hitObject.layer == interactableLayer && hitObject.GetComponent<Rigidbody> () != null) 
-				{
-					tetheredObject = hitObject;
-
-					tetherGO.SetActive (true);
-					if (useTetherJoint)
-					{
-						tetherJoint.connectedBody = tetheredObject.GetComponent<Rigidbody> ();
-					} 
-					else 
-					{
-						tetheredObject.transform.SetParent (tetherGO.transform, true);
-						tetheredObject.transform.position = tetherGO.transform.position;
-						//move to tetherGO
-					}
-					tetheredObject.GetComponent<Rigidbody> ().useGravity = false;
-
-					objTetherable = true;
+					closestDist = dist;
+					hitObject = collider.gameObject;
 				}
-				else if(hitObject.transform.parent != null)
-				{
-					hitObject = hitObject.transform.parent.gameObject;
-				}
-				else
-					break;
 			}
 
-		}
+				bool objTetherable = false;
 
+				while (!objTetherable)
+				{
+
+					if (hitObject.GetComponent<ITether> () != null) 
+					{
+						hitObject.GetComponent<ITether> ().Tether ();
+						objTetherable = true;
+					} 
+
+					if (hitObject.layer == interactableLayer && hitObject.GetComponent<Rigidbody> () != null) 
+					{
+						tetheredObject = hitObject;
+
+						tetherGO.SetActive (true);
+						if (useTetherJoint)
+						{
+							tetherJoint.connectedBody = tetheredObject.GetComponent<Rigidbody> ();
+						} 
+						else 
+						{
+							tetheredObject.transform.SetParent (tetherGO.transform, true);
+							tetheredObject.transform.position = tetherGO.transform.position;
+							//move to tetherGO
+						}
+						tetheredObject.GetComponent<Rigidbody> ().useGravity = false;
+
+						objTetherable = true;
+					}
+					else if(hitObject.transform.parent != null)
+					{
+						hitObject = hitObject.transform.parent.gameObject;
+					}
+					else
+						break;
+				}
+		}
+			
 		tether.SetActive (true);
 	}
 	void TetherRelease()
@@ -440,6 +470,7 @@ public class ProbeController : MonoBehaviour
 		}
 		tetherGO.SetActive(false);
 
+		tetheredObject = null;
 		tethering = false;
 		tether.SetActive (false);
 	}

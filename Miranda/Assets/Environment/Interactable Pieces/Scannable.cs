@@ -6,6 +6,9 @@ public class Scannable : MonoBehaviour, IScannable
 {
 	bool beenScanned = false;
 
+	public IEvent eventScript = null;
+	public IBurn burnScript = null;
+
 	Renderer _renderer = null;
 	Color baseColor = Color.white;
 	public Color scanColor = Color.blue;
@@ -17,8 +20,13 @@ public class Scannable : MonoBehaviour, IScannable
 	QuotePayload message = QuotePayload.Uninitialized;
 
 	void Awake() {
-		_renderer = GetComponent<Renderer>();
-		baseColor = GetComponent<Renderer>().material.color;
+
+		if (GetComponent<Renderer> () != null)
+		{
+			_renderer = GetComponent<Renderer> ();
+
+			baseColor = GetComponent<Renderer> ().material.color;
+		}
 	}
 
 	void Start()
@@ -31,12 +39,23 @@ public class Scannable : MonoBehaviour, IScannable
 		beenScanned = true;
 		StartCoroutine(ChangeColor(scanColor));
 		QuoteBoxManager.Instance.ShowText(message);
+
+		if (eventScript != null) 
+		{
+			eventScript.StartEvent ();
+		}
 	}
 
-	IEnumerator ChangeColor(Color mColor) {
-		_renderer.material.color = mColor;
-		yield return new WaitForSeconds(1.0f);
-		_renderer.material.color = baseColor;
+	IEnumerator ChangeColor(Color mColor) 
+	{
+		if (_renderer != null) 
+			_renderer.material.color = mColor;
+		
+			yield return new WaitForSeconds (1.0f);
+
+		if (_renderer != null) 
+			_renderer.material.color = baseColor;
+
 	}
 
 	IEnumerator FlashColor()
