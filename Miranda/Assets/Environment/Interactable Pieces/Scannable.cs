@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Scannable : MonoBehaviour, IScannable
 {
 	bool beenScanned = false;
 
-	public IEvent eventScript = null;	//Attach The EventScript to be referenced must be on the same GameObject
+	public IEvent eventScript = null;
+	public IBurn burnScript = null;
 
 	Renderer _renderer = null;
 	Color baseColor = Color.white;
@@ -29,7 +31,7 @@ public class Scannable : MonoBehaviour, IScannable
 
 	void Start()
 	{
-		eventScript = GetComponent<IEvent> ();
+
 	}
 
 	public void OnScanned() {
