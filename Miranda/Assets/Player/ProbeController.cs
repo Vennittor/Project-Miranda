@@ -7,6 +7,12 @@ public class ProbeController : MonoBehaviour
 	Rigidbody rb;
 
 	[Header("References")]
+	public GameObject leftToolJoint = null;
+	public GameObject leftJoint0 = null;
+	public GameObject leftJoint1 = null;
+	public GameObject rightToolJoint = null;
+	public GameObject rightJoint0 = null;
+	public GameObject rightJoint1 = null;
 
 	public PlayerScanner interactField = null;
 	public Light ambientLight = null;
