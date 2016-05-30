@@ -180,6 +180,8 @@ public class ProbeController : MonoBehaviour
 			leftTool++;
 			if (leftTool > 1)
 				leftTool = 0;
+			//change leftToolJoint .localRotation.z 180;
+
 		}
 		if (Input.GetKeyDown (KeyCode.C)) 
 		{
@@ -189,6 +191,8 @@ public class ProbeController : MonoBehaviour
 			rightTool++;
 			if(rightTool > 1)
 				rightTool = 0;
+
+			//change rightToolJoint .localRotation.z 180;
 		}
 		#endregion
 
