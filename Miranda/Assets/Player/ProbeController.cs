@@ -52,6 +52,8 @@ public class ProbeController : MonoBehaviour
 
 	public int leftTool = 0;
 	public int rightTool = 0;
+	bool switchingLeftTool = false;
+	bool switchingRightTool = false;
 
 	public bool scanning = false;
 
@@ -166,10 +168,10 @@ public class ProbeController : MonoBehaviour
 			
 	}
 
+	#region Tool Controls
 	void ActivateTools()
 	{
-		#region Tool Switch Temp
-		if (Input.GetKeyDown (KeyCode.Z)) 
+		if (Input.GetKeyDown (KeyCode.Z) && !switchingLeftTool) 
 		{
 			if(tethering)
 				TetherRelease();
@@ -180,10 +182,11 @@ public class ProbeController : MonoBehaviour
 			leftTool++;
 			if (leftTool > 1)
 				leftTool = 0;
-			//change leftToolJoint .localRotation.z 180;
+
+			StartCoroutine ( SwitchLeftTool() );
 
 		}
-		if (Input.GetKeyDown (KeyCode.C)) 
+		if (Input.GetKeyDown (KeyCode.C) && !switchingRightTool) 
 		{
 			if(teleporting)
 				TeleportOff();
@@ -192,9 +195,8 @@ public class ProbeController : MonoBehaviour
 			if(rightTool > 1)
 				rightTool = 0;
 
-			//change rightToolJoint .localRotation.z 180;
+			StartCoroutine ( SwitchRightTool() );
 		}
-		#endregion
 
 		//Left Tools
 		if (Input.GetMouseButtonUp (0)) 
@@ -204,11 +206,12 @@ public class ProbeController : MonoBehaviour
 
 		if (Input.GetMouseButtonDown(0))
 		{
+			//Tether
 			if (leftTool == 0) 
 			{
 				TeleportOff ();
 
-				if( !flashingLaser)
+				if( !flashingLaser && !switchingLeftTool)
 					Tether ();
 			}
 
@@ -221,9 +224,10 @@ public class ProbeController : MonoBehaviour
 			}
 		}
 
+		//Keeps checking for a Tetherable object while left mouse is held down
 		if (Input.GetMouseButton (0) )
 		{
-			if(leftTool == 0)
+			if(leftTool == 0 && !switchingLeftTool)
 			{
 				if (!flashingLaser && tetheredObject == null)
 					Tether ();
@@ -235,12 +239,14 @@ public class ProbeController : MonoBehaviour
 		//Right Tools
 		if(Input.GetMouseButtonDown(1))
 		{
+			//Shield
 			if (rightTool == 0) 
 			{
 				
 				ShieldOn ();
 			}
 
+			//Teleporter
 			if (rightTool == 1) 
 			{
 				if(!teleporting)
@@ -248,18 +254,63 @@ public class ProbeController : MonoBehaviour
 			}
 		}
 
+		//On Right Mouse release, turns off Shield, or tries to activate a teleport in progress.
 		if (Input.GetMouseButtonUp (1))
 		{
-			ShieldOff ();
+			if(rightTool == 0)
+				ShieldOff ();
 
-			if ( ValidTeleport () )
-				Teleport ();
-			else
-				TeleportOff();
+			if (rightTool == 1)
+			{
+				if (ValidTeleport ())
+					Teleport ();
+				else
+					TeleportOff ();
+			}
 		}
 
 
 	}
+
+	IEnumerator SwitchLeftTool()
+	{
+		switchingLeftTool = true;
+
+		Vector3 rot = leftToolJoint.transform.localRotation.eulerAngles;
+		float zStart = rot.z;
+		float zEnd = rot.z + 180;
+
+
+		for (int i = 1; i <= 15; i++) 
+		{
+			rot.z = Mathf.LerpAngle(zStart, zEnd, i/15f);
+			leftToolJoint.transform.localRotation = Quaternion.Euler (rot);
+
+			yield return new WaitForSeconds (1f/120f);
+		}
+
+		switchingLeftTool = false;
+	}
+	IEnumerator SwitchRightTool()
+	{
+		switchingRightTool = true;
+
+		Vector3 rot = rightToolJoint.transform.localRotation.eulerAngles;
+		float zStart = rot.z;
+		float zEnd = rot.z - 180;
+
+		for (int i = 1; i <= 15; i++) 
+		{
+			rot.z = Mathf.LerpAngle(zStart, zEnd, i/15f);
+			rightToolJoint.transform.localRotation = Quaternion.Euler (rot);
+
+			yield return new WaitForSeconds (1f/120f);
+		}
+
+		switchingRightTool = false;
+	}
+
+	#endregion
 
 	void UpdateMouselook() 
 	{
@@ -387,15 +438,17 @@ public class ProbeController : MonoBehaviour
 		scanning = false;
 	}
 
+	#region Tether
 	void Tether()
 	{
 		//Flash Tether effects
 		//If no Object, stop
 		//if object, continue tether
 
-		if(tetheredObject != null)
+		if(tetheredObject != null)	//if you have a tethered object, skip everything else
 			return;
 
+		//Check for tetherable objects in range
 		List<Collider> hitColliders = new List<Collider> ();
 		hitColliders.AddRange( Physics.OverlapSphere(tetherGO.transform.position, tetherGrabRange) );
 
@@ -461,7 +514,8 @@ public class ProbeController : MonoBehaviour
 						break;
 				}
 		}
-			
+
+		tethering = true;
 		tether.SetActive (true);
 	}
 	void TetherRelease()
@@ -484,6 +538,7 @@ public class ProbeController : MonoBehaviour
 		tethering = false;
 		tether.SetActive (false);
 	}
+	#endregion
 
 	void Laser()
 	{
