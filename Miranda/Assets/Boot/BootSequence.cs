@@ -4,7 +4,15 @@ using UnityEngine.SceneManagement;
 
 public class BootSequence : MonoBehaviour {
 	[SerializeField]
+	QuoteBox startTextBox = null;
+	[SerializeField]
+	QuoteBox asmQuoteBox = null;
+
+	[SerializeField]
 	QuotePayload dialogue = QuotePayload.Uninitialized;
+	[SerializeField]
+	QuotePayload asmPayload = QuotePayload.Uninitialized;
+
 
 	[SerializeField]
 	KeyCode bootKey = KeyCode.Space;
@@ -28,8 +36,10 @@ public class BootSequence : MonoBehaviour {
 
 	IEnumerator DelayTextReset(float mSeconds) {
 		while(isActiveAndEnabled) {
-			QuoteBoxManager.Instance.ShowText(dialogue);
+			QuoteBoxManager.Instance.ShowText(startTextBox,dialogue);
+			QuoteBoxManager.Instance.ShowText(asmQuoteBox,asmPayload);
 			yield return new WaitForSeconds(mSeconds);
+		
 			SceneManager.LoadScene("Boot");
 		}
 	}

@@ -27,6 +27,9 @@ public class QuoteBox : MonoBehaviour {
 
 	[Header("Options")]
 	[SerializeField]
+	int linesSupported = 5;
+	int currentDisplayedLines = 0;
+	[SerializeField]
 	QuoteBoxSpeed defaultTextSpeed = QuoteBoxSpeed.NORMAL;
 	[SerializeField]
 	bool isPanelVisible = true;
@@ -229,6 +232,21 @@ public class QuoteBox : MonoBehaviour {
 	void PutChar(char mChar) {
 		// play sound effect if applicable
 		displayedText = displayedText + mChar;
+		if (mChar == char.Parse("\n")) {
+			currentDisplayedLines += 1;
+			CullExcessLines();
+		}
+	}
+
+	void CullExcessLines() {
+		while(currentDisplayedLines > linesSupported) {
+			string tBufferText = displayedText;
+			int index = tBufferText.IndexOf(System.Environment.NewLine);
+			displayedText = tBufferText.Substring(index + System.Environment.NewLine.Length);
+			currentDisplayedLines -= 1;
+			if (Input.GetKeyDown(KeyCode.Semicolon))
+				break;
+		}
 	}
 
 	void RefreshQuoteText() {
