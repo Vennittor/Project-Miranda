@@ -17,6 +17,7 @@ public class GameManager : Singleton<GameManager> {
 	void Start() {
 		//QuoteBoxManager.Instance.DefaultQuoteBox.EvOnOpen += Pause;
 		//QuoteBoxManager.Instance.DefaultQuoteBox.EvOnClose += Resume;
+		Physics.gravity = new Vector3(0, -1.8f, 0);
 	}
 
 	void OnDestroy() {
