@@ -557,37 +557,50 @@ public class ProbeController : MonoBehaviour
 
 		yield return new WaitForSeconds(laserDelay);
 
-		Ray ray = new Ray ();
-		ray.origin = this.gameObject.transform.position;
-		ray.direction = transform.forward;
+		List<Collider> hitColliders = new List<Collider> ();
+		hitColliders.AddRange( Physics.OverlapSphere(tetherGO.transform.position, laserRadius) );
 
-		RaycastHit hit;
+		GameObject hitObject = null;
+		Vector3 tetherPos = tetherGO.transform.position;
+		float closestDist = 0f;
 
-		if (Physics.SphereCast (ray, laserRadius, out hit, laserDistance)) 
+		if(hitColliders[0] != null)
 		{
-			GameObject hitObject = hit.collider.gameObject;
+			hitObject = hitColliders[0].gameObject;
+			closestDist = Vector3.Distance (tetherPos, hitObject.transform.position);
 
-			if (hitObject.GetComponent<IBurn> () != null) {
-				print ("burn");
-				hitObject.GetComponent<IBurn> ().Burn ();
-
-			} 
-			else 
+			foreach (Collider collider in hitColliders)
 			{
-				while (hitObject.transform.parent != null) 
-				{
-					hitObject = hitObject.transform.parent.gameObject;
+				if (collider == hitColliders [0])
+					continue;
 
-					if (hitObject.GetComponent<IBurn> () != null) 
-					{
-						print ("burn");
-						hitObject.GetComponent<IBurn> ().Burn ();
-						break;
-					}
+				Vector3 hitPos = collider.gameObject.transform.position;
+				float dist = Vector3.Distance (tetherPos, hitPos);
+
+				if (dist < closestDist)
+				{
+					closestDist = dist;
+					hitObject = collider.gameObject;
 				}
 			}
 
+			bool objBurnable = false;
 
+			while (!objBurnable)
+			{
+
+				if (hitObject.GetComponent<IBurn> () != null) 
+				{
+					hitObject.GetComponent<IBurn> ().Burn ();
+					objBurnable = true;
+				} 
+				else if(hitObject.transform.parent != null)
+				{
+					hitObject = hitObject.transform.parent.gameObject;
+				}
+				else
+					break;
+			}
 		}
 
 		laser.SetActive(false);
